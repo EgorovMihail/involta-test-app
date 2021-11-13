@@ -3,7 +3,93 @@ import React, { useEffect, useRef, useState } from "react";
 import ButtonsPrimary from "../Buttons/Buttons";
 import style from "../Input/InputFromFile.module.sass";
 import classNames from "classnames";
-import { Step, StepLabel, Stepper } from "@material-ui/core";
+import Stage from "../Stage/Stage";
+
+import PropTypes from "prop-types";
+import { styled } from "@mui/material/styles";
+import Stack from "@mui/material/Stack";
+import Stepper from "@mui/material/Stepper";
+import Step from "@mui/material/Step";
+import StepLabel from "@mui/material/StepLabel";
+import StepConnector, {
+  stepConnectorClasses,
+} from "@mui/material/StepConnector";
+import { CheckCircle } from "@mui/icons-material";
+
+//======stepper
+const QontoConnector = styled(StepConnector)(({ theme }) => ({
+  [`&.${stepConnectorClasses.alternativeLabel}`]: {
+    top: 10,
+    left: "calc(-50% + 16px)",
+    right: "calc(50% + 16px)",
+  },
+  [`&.${stepConnectorClasses.active}`]: {
+    [`& .${stepConnectorClasses.line}`]: {
+      borderColor: "#F3EEEE",
+    },
+  },
+  [`&.${stepConnectorClasses.completed}`]: {
+    [`& .${stepConnectorClasses.line}`]: {
+      borderColor: "#F3EEEE",
+    },
+  },
+  [`& .${stepConnectorClasses.line}`]: {
+    borderColor:
+      theme.palette.mode === "dark" ? theme.palette.grey[800] : "#b4afaf",
+    borderTopWidth: 3,
+    borderRadius: 1,
+  },
+}));
+
+const QontoStepIconRoot = styled("div")(({ theme, ownerState }) => ({
+  color: theme.palette.mode === "dark" ? theme.palette.grey[700] : "#b4afaf",
+  display: "flex",
+  height: 22,
+  alignItems: "center",
+  ...(ownerState.active && {
+    color: "#F3EEEE",
+  }),
+  "& .QontoStepIcon-completedIcon": {
+    color: "#F3EEEE",
+    zIndex: 1,
+    fontSize: 20,
+  },
+  "& .QontoStepIcon-circle": {
+    width: 8,
+    height: 8,
+    borderRadius: "50%",
+    backgroundColor: "currentColor",
+  },
+}));
+
+function QontoStepIcon(props) {
+  const { active, completed, className } = props;
+
+  return (
+    <QontoStepIconRoot ownerState={{ active }} className={className}>
+      {completed ? (
+        <CheckCircle className="QontoStepIcon-completedIcon" />
+      ) : (
+        <div className="QontoStepIcon-circle" />
+      )}
+    </QontoStepIconRoot>
+  );
+}
+
+QontoStepIcon.propTypes = {
+  /**
+   * Whether this step is active.
+   * @default false
+   */
+  active: PropTypes.bool,
+  className: PropTypes.string,
+  /**
+   * Mark the step as completed. Is passed to child components.
+   * @default false
+   */
+  completed: PropTypes.bool,
+};
+//=====stepper
 
 //==== обработка файла
 const getFileShema = (file) =>
@@ -58,10 +144,6 @@ export default function MultiStep({ children, initialValues, onSubmit }) {
     setSnapshot(values);
     setStepNumber(stepNumber + 1);
   };
-  // const errorsfunc = (er) => {
-  //   console.log(er);
-  //   getArrErrorsMessages(er).map((error) => getError(error));
-  // };
 
   //тут могут быть ошибки 33,00
   const handleSubmit = async (values) => {
@@ -109,16 +191,36 @@ export default function MultiStep({ children, initialValues, onSubmit }) {
       >
         {(formik) => (
           <Form>
-            <Stepper activeStep={stepNumber}>
-              {steps.map((currentStep) => {
-                const label = currentStep.props.stepName;
-                return (
-                  <Step key={label}>
-                    <StepLabel>{label}</StepLabel>
-                  </Step>
-                );
-              })}
-            </Stepper>
+            <Stage>
+              <Stack sx={{ width: "100%" }} spacing={4}>
+                <Stepper
+                  alternativeLabel
+                  activeStep={stepNumber}
+                  connector={<QontoConnector />}
+                >
+                  {steps.map((currentStep) => {
+                    const label = currentStep.props.stepName;
+                    return (
+                      <Step key={label}>
+                        <StepLabel
+                          StepIconComponent={QontoStepIcon}
+                        ></StepLabel>
+                      </Step>
+                    );
+                  })}
+                </Stepper>
+              </Stack>
+              {/* <Stepper activeStep={stepNumber}>
+                {steps.map((currentStep) => {
+                  const label = currentStep.props.stepName;
+                  return (
+                    <Step key={label}>
+                      <StepLabel>{label}</StepLabel>
+                    </Step>
+                  );
+                })}
+              </Stepper> */}
+            </Stage>
 
             {step}
 

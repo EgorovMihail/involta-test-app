@@ -112,7 +112,6 @@ export default function Home() {
   return (
     <div className={styles.container}>
       <FormConteiner>
-        <Stage></Stage>
         <div className={styles.conteiner__form}>
           <MultiStep
             initialValues={{
