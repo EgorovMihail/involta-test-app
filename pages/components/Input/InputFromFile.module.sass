@@ -10,8 +10,19 @@
     background-image: url(../../images/icon.png)
     background-repeat: no-repeat
     background-position: center
+
 .imgPreview
     object-fit: cover
+    overflow: hidden
+    height: 250px
+    width: 250px
+    border-radius: 50%
+    cursor: pointer
+.wrap
+    display: flex
+    flex-direction: column
+    align-items: center
+
 .input
     display: none
 
@@ -21,3 +32,5 @@
     justify-content: space-between
     align-items: center
     height: 445px
+.input__wrap
+    background-color: red

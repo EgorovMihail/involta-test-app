@@ -2,6 +2,7 @@ import { FieldArray, Form, Formik } from "formik";
 import React, { useEffect, useRef, useState } from "react";
 import ButtonsPrimary from "../Buttons/Buttons";
 import style from "../Input/InputFromFile.module.sass";
+import styles from "./MultiStep.module.sass";
 import classNames from "classnames";
 import Stage from "../Stage/Stage";
 
@@ -15,8 +16,8 @@ import StepConnector, {
   stepConnectorClasses,
 } from "@mui/material/StepConnector";
 import { CheckCircle } from "@mui/icons-material";
+import { useRouter } from "next/router";
 
-//======stepper
 const QontoConnector = styled(StepConnector)(({ theme }) => ({
   [`&.${stepConnectorClasses.alternativeLabel}`]: {
     top: 10,
@@ -89,9 +90,7 @@ QontoStepIcon.propTypes = {
    */
   completed: PropTypes.bool,
 };
-//=====stepper
 
-//==== обработка файла
 const getFileShema = (file) =>
   file && {
     file: file,
@@ -111,7 +110,7 @@ const getArrErrorsMessages = (errors) => {
         });
       }
     });
-  console.log(result);
+
   return result;
 };
 const getError = (error) => {
@@ -125,44 +124,33 @@ const getError = (error) => {
 };
 
 export default function MultiStep({ children, initialValues, onSubmit }) {
+  const router = useRouter();
+
   const [stepNumber, setStepNumber] = useState(0);
   const steps = React.Children.toArray(children);
-  console.log("steps: ", steps);
-
   const [snapshot, setSnapshot] = useState(initialValues);
-
   const step = steps[stepNumber];
-  console.log("step: ", step);
-  //const totalSteps = step.length; //вот тут ошибка
-  const totalSteps = 3; //вот тут ошибка
+  const totalSteps = 3;
 
   const isLastStep = stepNumber === totalSteps - 1;
-  console.log("isLastStep: ", isLastStep);
 
-  // вот тут возможно Formikvalues(values:Formikvalues)
   const next = (values) => {
     setSnapshot(values);
     setStepNumber(stepNumber + 1);
   };
 
-  //тут могут быть ошибки 33,00
   const handleSubmit = async (values) => {
     if (step.props.onSubmit) {
       await step.props.onSubmit(values);
     }
     if (isLastStep) {
-      //return onSubmit(values, actions);
-
-      console.log(JSON.stringify(formik.values, null, 2));
-
+      alert.log(JSON.stringify(formik.values, null, 2));
       return onSubmit(values);
     } else {
-      //actions.setTouched({});
       next(values);
     }
   };
 
-  //======== My Input
   const [preview, setPreview] = useState();
   const fieldInputRef = useRef();
   const [image, setImage] = useState();
@@ -170,142 +158,144 @@ export default function MultiStep({ children, initialValues, onSubmit }) {
     if (image) {
       const reader = new FileReader();
       reader.onloadend = () => {
-        //setTransition(true);
         setPreview(reader.result);
       };
       reader.readAsDataURL(image);
     } else {
-      //setTransition(false);
       setPreview(null);
     }
   }, [image]);
 
-  //======== My Input
+  const regisrForm = async (values) => {
+    const res = await fetch("/api/server", {
+      method: "POST",
+      body: JSON.stringify(values, null, 2),
+    });
+
+    const respons = await res.json();
+    if (respons.status == 1) {
+      router.push("./result");
+    } else {
+      router.push("./error");
+    }
+  };
 
   return (
-    <div>
+    <>
       <Formik
         initialValues={snapshot}
         onSubmit={handleSubmit}
         validationSchema={step.props.validationSchema}
       >
         {(formik) => (
-          <Form>
-            <Stage>
-              <Stack sx={{ width: "100%" }} spacing={4}>
-                <Stepper
-                  alternativeLabel
-                  activeStep={stepNumber}
-                  connector={<QontoConnector />}
-                >
-                  {steps.map((currentStep) => {
-                    const label = currentStep.props.stepName;
-                    return (
-                      <Step key={label}>
-                        <StepLabel
-                          StepIconComponent={QontoStepIcon}
-                        ></StepLabel>
-                      </Step>
-                    );
-                  })}
-                </Stepper>
-              </Stack>
-              {/* <Stepper activeStep={stepNumber}>
-                {steps.map((currentStep) => {
-                  const label = currentStep.props.stepName;
-                  return (
-                    <Step key={label}>
-                      <StepLabel>{label}</StepLabel>
-                    </Step>
-                  );
-                })}
-              </Stepper> */}
-            </Stage>
+          <Form className={styles.form}>
+            <div className={style.wrap}>
+              <Stage>
+                <Stack sx={{ width: "100%" }} spacing={4}>
+                  <Stepper
+                    alternativeLabel
+                    activeStep={stepNumber}
+                    connector={<QontoConnector />}
+                  >
+                    {steps.map((currentStep) => {
+                      const label = currentStep.props.stepName;
+                      return (
+                        <Step key={label}>
+                          <StepLabel
+                            StepIconComponent={QontoStepIcon}
+                          ></StepLabel>
+                        </Step>
+                      );
+                    })}
+                  </Stepper>
+                </Stack>
+              </Stage>
 
-            {step}
+              {step}
 
-            {step.key == 0.2 ? (
-              <FieldArray
-                name="file"
-                render={(arrayHelpers) => (
-                  <>
-                    <div className={style.form__content}>
-                      <div className={style.input__wrap}>
-                        {preview ? (
-                          <img
-                            src={preview}
-                            className={style.imgPreview}
-                            onClick={() => {
-                              setImage(null);
-                            }}
-                          />
-                        ) : (
-                          <button
-                            className={style.button}
-                            onClick={(event) => {
-                              event.preventDefault();
-                              fieldInputRef.current.click();
-                            }}
-                          ></button>
-                        )}
-                        {/* ======= */}
-                        <input
-                          id="file"
-                          className={classNames(style.input)}
-                          ref={fieldInputRef}
-                          accept="image/*"
-                          name="file"
-                          type="file"
-                          onChange={(event) => {
-                            const { files } = event.target;
-                            const filePrev = event.target.files[0];
-                            const file = getFileShema(files.item(0));
-
-                            if (
-                              filePrev &&
-                              filePrev.type.substr(0, 5) === "image"
-                            ) {
-                              //setValues({ file });
-                              setImage(filePrev);
-                              //setTransition(true);
-                            } else {
-                              //setTransition(false);
-                              setImage(null);
-                            }
-
-                            if (!file) {
-                              arrayHelpers.remove(0);
-                              //setImage(null);
-                            }
-                            if (Array.isArray(formik.values.file)) {
-                              arrayHelpers.replace(0, file);
-                            } else {
-                              arrayHelpers.push(file);
-                            }
+              {step.key == 0.2 ? (
+                <FieldArray
+                  name="file"
+                  render={(arrayHelpers) => (
+                    <>
+                      {preview ? (
+                        <img
+                          src={preview}
+                          className={style.imgPreview}
+                          onClick={() => {
+                            setImage(null);
+                            formik.values.file = [];
                           }}
                         />
+                      ) : (
+                        <button
+                          className={style.button}
+                          onClick={(event) => {
+                            event.preventDefault();
+                            fieldInputRef.current.click();
+                          }}
+                        ></button>
+                      )}
 
-                        {getArrErrorsMessages(formik.errors.file).map((error) =>
-                          getError(error),
-                        )}
-                      </div>
-                    </div>
-                  </>
-                )}
-              />
+                      <input
+                        id="file"
+                        className={classNames(style.input)}
+                        ref={fieldInputRef}
+                        accept="image/*"
+                        name="file"
+                        type="file"
+                        onChange={(event) => {
+                          const { files } = event.target;
+                          const filePrev = event.target.files[0];
+                          const file = getFileShema(files.item(0));
+
+                          if (
+                            filePrev &&
+                            filePrev.type.substr(0, 5) === "image"
+                          ) {
+                            setImage(filePrev);
+                          } else {
+                            formik.values.file = [];
+                            setImage(null);
+                          }
+
+                          if (!file) {
+                            arrayHelpers.remove(0);
+                          }
+                          if (Array.isArray(formik.values.file)) {
+                            arrayHelpers.replace(0, file);
+                          } else {
+                            arrayHelpers.push(file);
+                          }
+                        }}
+                      />
+
+                      {getArrErrorsMessages(formik.errors.file).map((error) =>
+                        getError(error),
+                      )}
+                    </>
+                  )}
+                />
+              ) : (
+                <></>
+              )}
+            </div>
+            {step.key == 0.2 ? (
+              <ButtonsPrimary
+                click={() => {
+                  if (formik.values.file.length != 0) {
+                    regisrForm(formik.values);
+                  }
+                }}
+                isLastStep={isLastStep}
+              ></ButtonsPrimary>
             ) : (
-              <></>
+              <ButtonsPrimary isLastStep={isLastStep}></ButtonsPrimary>
             )}
-            {/* возможно нужно дополнить */}
-
-            <ButtonsPrimary
-              //submitError={formik.errors.file}
-              isLastStep={isLastStep}
-            ></ButtonsPrimary>
           </Form>
         )}
       </Formik>
-    </div>
+    </>
   );
 }
 
