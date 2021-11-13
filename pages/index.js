@@ -1,15 +1,9 @@
-import ButtonsPrimary from "./components/Buttons/Buttons";
 import FormConteiner from "./components/FormContainer/FormContainer";
 import Title from "./components/Title/Title";
-import Stage from "./components/Stage/Stage";
-import FormComponent from "./components/FormComponent/FormComponent";
-import { InputMy } from "./components/Input/InputMy";
-import { useRouter } from "next/router";
-import { Formik, Form, Field, FieldArray } from "formik";
+import { InputComponent } from "./components/Input/InputComponent";
 import * as Yup from "yup";
 import styles from "../styles/Home.module.sass";
 import MultiStep, { FormStep } from "./components/MultiStep/MultiStep";
-
 import parsePhoneNumberFromString from "libphonenumber-js";
 
 // ====== валидация  для 1 шага=====
@@ -41,8 +35,7 @@ const validateСontactInformation = Yup.object().shape({
       function () {
         return this.parent.tel || this.parent.email;
       },
-    )
-    .min(11, "Слишком  короткий номер!"),
+    ),
 
   email: Yup.string()
     .test(
@@ -79,12 +72,12 @@ const validateUserPhoto = Yup.object().shape({
     )
     .required("Добавте свою фотографию!"),
 });
+//функция создания маски
 const normolizePhoneNumber = (value) => {
   const phoneNumberObj = {
     plus: "+",
     value: value,
   };
-
   if (
     phoneNumberObj.value.split("").length == 11 &&
     phoneNumberObj.value.split("")[0] != "+"
@@ -123,24 +116,24 @@ export default function Home() {
             >
               <div className={styles.input__wrap}>
                 <Title text="Личная информация"></Title>
-                <InputMy
+                <InputComponent
                   id="lastName"
                   type="text"
                   placeholder="Фамилия"
                   name="lastName"
-                ></InputMy>
-                <InputMy
+                ></InputComponent>
+                <InputComponent
                   id="firstName"
                   type="text"
                   placeholder="Имя"
                   name="firstName"
-                ></InputMy>
-                <InputMy
+                ></InputComponent>
+                <InputComponent
                   id="patronymic"
                   type="text"
                   placeholder="Отчество"
                   name="patronymic"
-                ></InputMy>
+                ></InputComponent>
               </div>
             </FormStep>
 
@@ -153,7 +146,7 @@ export default function Home() {
               <div className={styles.input__wrap}>
                 <Title text="Контактная информация"></Title>
 
-                <InputMy
+                <InputComponent
                   id="tel"
                   type="tel"
                   placeholder="+7 (999) 999-99-99"
@@ -161,13 +154,13 @@ export default function Home() {
                   onInput={(e) => {
                     e.target.value = normolizePhoneNumber(e.target.value);
                   }}
-                ></InputMy>
-                <InputMy
+                ></InputComponent>
+                <InputComponent
                   id="email"
                   type="email"
                   placeholder="email@example.com"
                   name="email"
-                ></InputMy>
+                ></InputComponent>
               </div>
             </FormStep>
 

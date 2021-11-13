@@ -1,7 +1,7 @@
 import { FieldArray, Form, Formik } from "formik";
 import React, { useEffect, useRef, useState } from "react";
 import ButtonsPrimary from "../Buttons/Buttons";
-import style from "../Input/InputFromFile.module.sass";
+//import style from "../Input/InputFromFile.module.sass";
 import styles from "./MultiStep.module.sass";
 import classNames from "classnames";
 import Stage from "../Stage/Stage";
@@ -18,6 +18,7 @@ import StepConnector, {
 import { CheckCircle } from "@mui/icons-material";
 import { useRouter } from "next/router";
 
+// Stepper
 const QontoConnector = styled(StepConnector)(({ theme }) => ({
   [`&.${stepConnectorClasses.alternativeLabel}`]: {
     top: 10,
@@ -91,12 +92,15 @@ QontoStepIcon.propTypes = {
   completed: PropTypes.bool,
 };
 
+//перевод файла в формат обьекта
 const getFileShema = (file) =>
   file && {
     file: file,
     type: file.type,
     name: file.name,
   };
+
+//функция накопления  ошибок
 const getArrErrorsMessages = (errors) => {
   const result = [];
   errors &&
@@ -113,6 +117,7 @@ const getArrErrorsMessages = (errors) => {
 
   return result;
 };
+//функция вывода ошибок
 const getError = (error) => {
   return (
     error && (
@@ -144,7 +149,6 @@ export default function MultiStep({ children, initialValues, onSubmit }) {
       await step.props.onSubmit(values);
     }
     if (isLastStep) {
-      alert.log(JSON.stringify(formik.values, null, 2));
       return onSubmit(values);
     } else {
       next(values);
@@ -154,6 +158,7 @@ export default function MultiStep({ children, initialValues, onSubmit }) {
   const [preview, setPreview] = useState();
   const fieldInputRef = useRef();
   const [image, setImage] = useState();
+
   useEffect(() => {
     if (image) {
       const reader = new FileReader();
@@ -166,6 +171,7 @@ export default function MultiStep({ children, initialValues, onSubmit }) {
     }
   }, [image]);
 
+  //"регистрация пользователя"
   const regisrForm = async (values) => {
     const res = await fetch("/api/server", {
       method: "POST",
@@ -189,7 +195,7 @@ export default function MultiStep({ children, initialValues, onSubmit }) {
       >
         {(formik) => (
           <Form className={styles.form}>
-            <div className={style.wrap}>
+            <div className={styles.wrap}>
               <Stage>
                 <Stack sx={{ width: "100%" }} spacing={4}>
                   <Stepper
@@ -221,7 +227,7 @@ export default function MultiStep({ children, initialValues, onSubmit }) {
                       {preview ? (
                         <img
                           src={preview}
-                          className={style.imgPreview}
+                          className={styles.imgPreview}
                           onClick={() => {
                             setImage(null);
                             formik.values.file = [];
@@ -229,7 +235,7 @@ export default function MultiStep({ children, initialValues, onSubmit }) {
                         />
                       ) : (
                         <button
-                          className={style.button}
+                          className={styles.button}
                           onClick={(event) => {
                             event.preventDefault();
                             fieldInputRef.current.click();
@@ -239,7 +245,7 @@ export default function MultiStep({ children, initialValues, onSubmit }) {
 
                       <input
                         id="file"
-                        className={classNames(style.input)}
+                        className={classNames(styles.input)}
                         ref={fieldInputRef}
                         accept="image/*"
                         name="file"

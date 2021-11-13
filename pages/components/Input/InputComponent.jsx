@@ -1,9 +1,9 @@
 import { ErrorMessage, useField } from "formik";
 import { forwardRef } from "react";
-import style from "./Input.module.sass";
+import style from "./InputComponent.module.sass";
 import classNames from "classnames";
 
-export const InputMy = forwardRef((props, ref) => {
+export const InputComponent = forwardRef((props, ref) => {
   const [field, meta] = useField(props);
 
   return (
